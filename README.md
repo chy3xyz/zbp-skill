@@ -60,14 +60,25 @@ Detailed guide: `references/tool-adapters.md`
 
 ## Install (Claude Code)
 
-```
-/plugin install zbp-skill@chy3xyz
+### Method 1: Clone + local install (most reliable)
+
+```bash
+git clone https://github.com/chy3xyz/zbp-skill.git
+/plugin install --plugin-dir ./zbp-skill/plugins/zbp-skill
 ```
 
-Or add as marketplace:
+### Method 2: Marketplace (requires GitHub SSH)
 
-```
+```bash
 /plugin marketplace add chy3xyz/zbp-skill
+/plugin install zbp-skill@chy3xyz-zbp-skill
+```
+
+### Method 3: Direct marketplace URL
+
+```bash
+/plugin marketplace add https://github.com/chy3xyz/zbp-skill.git
+/plugin install zbp-skill@zbp-skill
 ```
 
 ## License
