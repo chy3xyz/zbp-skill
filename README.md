@@ -60,15 +60,22 @@ Detailed guide: `references/tool-adapters.md`
 
 ## Install (Claude Code)
 
-```bash
-git clone https://github.com/chy3xyz/zbp-skill.git
-/plugin install --plugin-dir ./zbp-skill/plugins/zbp-skill
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "zbp-skill": {
+      "source": { "source": "github", "repo": "chy3xyz/zbp-skill" }
+    }
+  },
+  "enabledPlugins": {
+    "zbp-skill@zbp-skill": true
+  }
+}
 ```
 
-Verify:
-```bash
-ls ~/.claude/plugins/cache/zbp-skill/
-```
+Then restart Claude Code. The skill auto-loads when editing `.zig` files.
 
 ## License
 
