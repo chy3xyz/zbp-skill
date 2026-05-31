@@ -1,0 +1,8 @@
+{
+  "name": "zbp-skill",
+  "description": "ZBP (Zig Best Practice) — comprehensive patterns for memory safety, error handling, comptime, concurrency, C interop, and naming. Cross-referenced with Zig 0.17 dev docs. Derived from TigerBeetle, Bun, libxev, and Ghostty.",
+  "version": "1.2.0",
+  "author": {
+    "name": "grapebaba"
+  }
+}

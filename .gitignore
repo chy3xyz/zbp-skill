@@ -1,0 +1,8 @@
+.DS_Store
+*.swp
+*.swo
+*~
+*.html
+.remember/
+.zig-cache/
+zig-out/

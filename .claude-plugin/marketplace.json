@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "zbp-skill",
+  "description": "ZBP (Zig Best Practice) — comprehensive Zig patterns cross-referenced with 0.17 dev docs. Derived from TigerBeetle, Bun, libxev, and Ghostty.",
+  "owner": {
+    "name": "GrapeBaBa"
+  },
+  "plugins": [
+    {
+      "name": "zbp-skill",
+      "description": "ZBP — Zig Best Practices for memory safety, error handling, comptime patterns, memory layout, thread safety, smart pointers, and C interop. Zig 0.17 dev reference.",
+      "version": "1.2.0",
+      "author": {
+        "name": "GrapeBaBa"
+      },
+      "source": "./plugins/zbp-skill"
+    }
+  ]
+}
