@@ -1,81 +1,46 @@
 # zbp-skill
 
-ZBP (Zig Best Practice) — Claude Code skill plugin. Comprehensive Zig patterns
-cross-referenced with the [Zig 0.17 (dev) Language Reference](https://ziglang.org/documentation/master/).
+Zig Best Practice skill for AI coding tools. 11 sections of production-derived
+patterns, cross-referenced with Zig 0.17 dev docs.
 
-## Structure
+## Quick Install (Claude Code)
 
-```
-plugins/zbp-skill/skills/zbp/
-├── SKILL.md                              # Core skill: 11 sections of patterns
-├── references/
-│   ├── zig-017-official-docs.md          # Pattern-to-docs cross-reference
-│   ├── style-guide-comparison.md         # Official vs TigerBeetle style
-│   ├── error-handling.md                 # Full error semantics from 0.17
-│   ├── comptime-reference.md             # Comptime deep-dive from 0.17
-│   ├── memory-management.md              # Allocators, lifetime, struct layout
-│   └── leak-prevention.md                # Systematic leak prevention for AI code
-├── examples/
-│   └── comprehensive_resource.zig       # Full init/deinit/pool/C-interop example
-└── scripts/
-    └── check_build.zig                  # Scan project for common anti-patterns
+```bash
+curl -fsSL https://raw.githubusercontent.com/chy3xyz/zbp-skill/main/install.sh | bash
 ```
 
-## Patterns Covered (11 Sections)
+Then `/reload-plugins`. The `zbp` skill auto-loads when editing `.zig` files.
 
-1. **Memory Safety** — errdefer chains, arena allocators, poisoning, allocator selection guide
-2. **Infallible Runtime Operations** — AssumeCapacity across all container types
-3. **Error Handling** — narrow error sets, exhaustive switches, error composition
-4. **Comptime & Generics** — anytype, type functions, @fieldParentPtr, @Type, @embedFile
-5. **Memory Layout & Copy Safety** — extern structs, SIMD, mmap, cache alignment, packed structs
-6. **Naming & Style** — official (camelCase fn, TitleCase types) + community (snake_case fn)
-7. **Code Organization** — imports, intrusive data structures, object pools, ref counting
-8. **Thread Safety & Concurrency** — threadlocal, lock-free MPSC queue, atomics
-9. **Smart Pointer Patterns** — copy-on-write, RefCount mixin
-10. **C Interop** — export fn, callconv, allocator bridging, pointer smuggling
-11. **Official 0.17 Patterns** — anytype, sentinel-terminated types, for/while+else, inline loops, @branchHint, @constCast/@volatileCast, non-exhaustive enums, doc comments
-
-## Sources & References
-
-- [TigerBeetle](https://github.com/tigerbeetle/tigerbeetle) — financial transactions database
-- [Bun](https://github.com/oven-sh/bun) — JavaScript runtime
-- [libxev](https://github.com/mitchellh/libxev) — cross-platform event loop
-- [Ghostty](https://github.com/ghostty-org/ghostty) — terminal emulator
-- [Zig 0.17 Language Reference](https://ziglang.org/documentation/master/) — official docs
-
-## Multi-Tool Support
+## Other AI Tools
 
 | Tool | How to use |
 |------|-----------|
-| **Claude Code** | Native plugin: `/plugin install zbp-skill@chy3xyz` |
 | **Codex (OpenAI)** | Paste `zbp-system-prompt.txt` into Custom Instructions |
 | **Kimi (Moonshot)** | Upload `SKILL.md` as knowledge file |
 | **GitHub Copilot** | Copy rules into `.github/copilot-instructions.md` |
-| **Cursor** | Copy rules into `.cursorrules` |
-| **Windsurf** | Copy rules into `.windsurfrules` |
+| **Cursor / Windsurf** | Copy rules into `.cursorrules` / `.windsurfrules` |
 | **Any AI tool** | Use `zbp-system-prompt.txt` as system prompt |
-| **Terminal AI** | `cat zbp-system-prompt.txt \| aichat "review: $(cat main.zig)"` |
 
-Detailed guide: `references/tool-adapters.md`
+Details: `plugins/zbp-skill/skills/zbp/references/tool-adapters.md`
 
-## Install (Claude Code)
+## Patterns (11 Sections)
 
-Add to `~/.claude/settings.json`:
+1. **Memory Safety** — errdefer chains, arena, poisoning, allocator selection
+2. **Infallible Runtime** — AssumeCapacity across all container types
+3. **Error Handling** — narrow error sets, exhaustive switches, error composition
+4. **Comptime & Generics** — anytype, type functions, @fieldParentPtr, @Type
+5. **Memory Layout** — extern/packed structs, SIMD, cache alignment
+6. **Naming & Style** — official + community conventions
+7. **Code Organization** — intrusive structures, object pools, ref counting
+8. **Thread Safety** — threadlocal, lock-free MPSC queue, atomics
+9. **Smart Pointers** — Cow, RefCount mixin
+10. **C Interop** — export fn, callconv, allocator bridging
+11. **Official 0.17** — sentinel types, for/while+else, @branchHint, non-exhaustive enums
 
-```json
-{
-  "extraKnownMarketplaces": {
-    "zbp-skill": {
-      "source": { "source": "github", "repo": "chy3xyz/zbp-skill" }
-    }
-  },
-  "enabledPlugins": {
-    "zbp-skill@zbp-skill": true
-  }
-}
-```
+## Sources
 
-Then restart Claude Code. The skill auto-loads when editing `.zig` files.
+- [TigerBeetle](https://github.com/tigerbeetle/tigerbeetle) · [Bun](https://github.com/oven-sh/bun) · [libxev](https://github.com/mitchellh/libxev) · [Ghostty](https://github.com/ghostty-org/ghostty)
+- [Zig 0.17 Language Reference](https://ziglang.org/documentation/master/)
 
 ## License
 
