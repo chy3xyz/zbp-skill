@@ -184,7 +184,7 @@ When a resource is conditionally acquired, declare it as `null` with an immediat
 `defer if`:
 
 ```zig
-var trace_file: ?std.fs.File = null;
+var trace_file: ?std.Io.File = null;
 defer if (trace_file) |file| file.close();
 
 var exe_path: ?[:0]const u8 = null;
@@ -192,7 +192,7 @@ defer if (exe_path) |path| allocator.free(path);
 
 // Later, conditionally assign:
 if (options.trace) |trace_path| {
-    trace_file = try std.fs.cwd().createFile(trace_path, .{});
+    trace_file = try std.Io.Dir.cwd().createFile(trace_path, .{});
 }
 ```
 
@@ -326,12 +326,7 @@ errdefer |err| {
 // Conditional cleanup based on error kind
 fn initResource(allocator: Allocator) !*Resource {
     const res = try allocator.create(Resource);
-    errdefer |err| {
-        if (err != error.OutOfMemory) {
-            // On OOM, no cleanup needed (no partial state)
-            allocator.destroy(res);
-        }
-    }
+    errdefer allocator.destroy(res); // always free the allocation on failure
     try res.init(allocator);
     return res;
 }
@@ -406,6 +401,10 @@ pub fn BoundedArrayType(comptime T: type, comptime capacity: usize) type {
     return struct {
         buffer: [capacity]T = undefined,
         count: u32 = 0,
+
+        pub fn full(array: *const @This()) bool {
+            return array.count >= capacity;
+        }
 
         pub fn push(array: *@This(), item: T) void {
             assert(!array.full());   // Panic, not error
@@ -1429,7 +1428,7 @@ pub fn ObjectPool(comptime T: type, comptime max_count: comptime_int) type {
             return allocator.create(Node) catch unreachable;
         }
 
-        pub fn release(self: *@This(), node: *Node) void {
+        pub fn release(self: *@This(), allocator: Allocator, node: *Node) void {
             if (max_count > 0 and self.count >= max_count) {
                 allocator.destroy(node);
                 return;
@@ -1596,6 +1595,7 @@ pub fn RefCount(
 
         pub fn deref(self: *T) void {
             const rc = &@field(self, field_name);
+            assert(rc.raw_count > 0); // catch double-free
             rc.raw_count -= 1;
             if (rc.raw_count == 0) {
                 destructor(self);
@@ -1663,11 +1663,11 @@ pub fn free(_: ?*anyopaque, ptr: ?*anyopaque) callconv(.c) void {
 Zero memory before freeing to prevent sensitive data leaks:
 
 ```zig
-export fn secure_free(ptr: *anyopaque) void {
-    const len = allocator.usable_size(ptr);
-    @memset(@as([*]u8, @ptrCast(ptr))[0..len], 0);
-    allocator.free(ptr);
+fn secureFree(allocator: std.mem.Allocator, ptr: []u8) void {
+    @memset(ptr, 0);      // zero before free
+    allocator.free(ptr);   // then release
 }
+// Usage: secureFree(allocator, buffer); — caller tracks the length
 ```
 
 Critical for cryptographic keys, passwords, and authentication tokens.
@@ -1699,11 +1699,12 @@ pub fn taggedPageAllocator(tag: VMTag) Allocator {
     };
 }
 
-fn alloc(context: *anyopaque, n: usize, ...) ?[*]u8 {
+fn alloc(context: *anyopaque, len: usize, log2_align: u8, ret_addr: usize) ?[*]u8 {
     const tag: VMTag = @enumFromInt(
         @as(u8, @truncate(@intFromPtr(context))),
     );
-    return map(n, alignment, tag);
+    _ = ret_addr;
+    return map(len, log2_align, tag);
 }
 ```
 

@@ -1,0 +1,88 @@
+# Zig Best Practices (zbp-skill v1.2)
+
+You are writing or reviewing Zig code (target: Zig 0.17). Apply these rules
+systematically. Violations = memory leaks or compile errors.
+
+## CRITICAL: Memory Leak Prevention (apply ALWAYS)
+
+1. Every .alloc() / .create() / .initCapacity() MUST have defer or errdefer
+   on the VERY NEXT LINE.
+2. Every try after an allocation MUST have a prior errdefer on that allocation.
+3. ArrayList in 0.17 uses .initCapacity(alloc, n) or .empty, NEVER .init(alloc).
+4. All tests MUST use std.testing.allocator.
+5. Deinit MUST reverse init order. End deinit with self.* = undefined.
+6. Optional resources MUST have defer if (x) |v| cleanup(v); at declaration.
+
+## Pre-Completion Verification
+
+Before outputting Zig code, verify:
+- grep for '.alloc' and '.create' — each has next-line defer/errdefer?
+- grep for 'ArrayList' — each has defer deinit?
+- grep for 'ArenaAllocator' — each has defer deinit?
+- Any catch unreachable on allocation? (should be error propagation)
+- Tests use std.testing.allocator?
+
+## Zig 0.17 API Changes
+
+OLD (removed)            → NEW (0.17)
+ArrayList(T).init(alloc) → var list: ArrayList(T) = .empty
+ArrayList(T).init(alloc) → try ArrayList(T).initCapacity(alloc, n)
+list.deinit()            → list.deinit(allocator)
+GeneralPurposeAllocator  → DebugAllocator(.{}){} (Debug) / smp_allocator (ReleaseFast)
+std.fs.File              → std.Io.File
+std.fs.cwd()             → std.Io.Dir.cwd()
+allocator.usable_size()  → REMOVED (caller tracks length)
+
+## Error Handling
+
+- Narrow error sets: error{X, Y} not anyerror.
+- catch |err| switch with exhaustive cases.
+- try for propagate; catch unreachable only with comment explaining why safe.
+- errdefer |err| { } to capture error for diagnostics.
+
+## Comptime & Types
+
+- anytype for compile-time duck typing (use @TypeOf to inspect).
+- fn(comptime T: type) type for generic containers.
+- @fieldParentPtr for zero-cost interface dispatch.
+- @compileError for invalid type parameters (not runtime panic).
+- inline fn NOT an optimization hint — forces comptime propagation of args.
+
+## Naming
+
+- Official: camelCase functions, TitleCase types.
+- Community (TigerBeetle/Bun/Ghostty): snake_case functions.
+- Follow the codebase convention. Either is valid.
+
+## Allocator Selection
+
+Library       → accept Allocator parameter
+CLI app       → ArenaAllocator (one deinit frees all)
+Cyclical      → ArenaAllocator per cycle
+Bounded       → FixedBufferAllocator
+Tests         → std.testing.allocator
+Test OOM      → std.testing.FailingAllocator
+Debug general → std.heap.DebugAllocator(.{}){}
+ReleaseFast   → std.heap.smp_allocator
+Linking libc  → std.heap.c_allocator
+
+## Hot Path Optimization
+
+- ensureTotalCapacity at init → putAssumeCapacity at runtime (infallible).
+- ArenaAllocator for request-scope allocations (zero per-item cleanup).
+- Packed struct for bit-level layout; extern struct for C ABI / wire format.
+- @Vector for SIMD; @atomicLoad/@atomicRmw for lock-free concurrency.
+
+## Quick Anti-Leak Scan (run before committing)
+
+```bash
+# Allocations without cleanup
+grep -n '\.alloc\|\.create\|\.initCapacity' *.zig | grep -v 'defer\|errdefer'
+# ArrayList without deinit
+grep -A1 'ArrayList' *.zig | grep -v 'defer'
+# Tests not using testing allocator
+grep -n 'allocator' *_test.zig | grep -v 'testing'
+zig test *.zig 2>&1 | grep -i 'leak'
+```
+
+Source: https://github.com/chy3xyz/zbp-skill

@@ -43,16 +43,31 @@ plugins/zbp-skill/skills/zbp/
 - [Ghostty](https://github.com/ghostty-org/ghostty) — terminal emulator
 - [Zig 0.17 Language Reference](https://ziglang.org/documentation/master/) — official docs
 
-## Install
+## Multi-Tool Support
+
+| Tool | How to use |
+|------|-----------|
+| **Claude Code** | Native plugin: `/plugin install zbp-skill@chy3xyz` |
+| **Codex (OpenAI)** | Paste `zbp-system-prompt.txt` into Custom Instructions |
+| **Kimi (Moonshot)** | Upload `SKILL.md` as knowledge file |
+| **GitHub Copilot** | Copy rules into `.github/copilot-instructions.md` |
+| **Cursor** | Copy rules into `.cursorrules` |
+| **Windsurf** | Copy rules into `.windsurfrules` |
+| **Any AI tool** | Use `zbp-system-prompt.txt` as system prompt |
+| **Terminal AI** | `cat zbp-system-prompt.txt \| aichat "review: $(cat main.zig)"` |
+
+Detailed guide: `references/tool-adapters.md`
+
+## Install (Claude Code)
 
 ```
-/plugin install zbp-skill@<your-marketplace>
+/plugin install zbp-skill@chy3xyz
 ```
 
-Or add this repo as a marketplace:
+Or add as marketplace:
 
 ```
-/plugin marketplace add <owner>/zbp-skill
+/plugin marketplace add chy3xyz/zbp-skill
 ```
 
 ## License
