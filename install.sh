@@ -6,6 +6,7 @@ set -e
 REPO="https://github.com/chy3xyz/zbp-skill.git"
 PLUGIN_DIR="${HOME}/.claude/plugins/cache/zbp-skill"
 MARKETPLACE_DIR="${HOME}/.claude/plugins/marketplaces/zbp-skill"
+AGENT_SKILL_DIR="${HOME}/.claude/agents/skills/zbp"
 SETTINGS="${HOME}/.claude/settings.json"
 
 echo "=== zbp-skill installer ==="
@@ -23,6 +24,12 @@ fi
 echo "Installing plugin to cache..."
 rm -rf "$PLUGIN_DIR"
 cp -r "$MARKETPLACE_DIR/plugins/zbp-skill" "$PLUGIN_DIR"
+
+# Install skill for agents (so sub-agents can invoke zbp)
+echo "Installing skill for agents..."
+mkdir -p "${HOME}/.claude/agents/skills"
+rm -rf "$AGENT_SKILL_DIR"
+cp -r "$MARKETPLACE_DIR/plugins/zbp-skill/skills/zbp" "$AGENT_SKILL_DIR"
 
 # Add marketplace to settings.json if not present
 if command -v python3 &>/dev/null; then
@@ -49,5 +56,6 @@ with open('$SETTINGS', 'w') as f:
 fi
 
 echo ""
-echo "Done. Restart Claude Code or run /reload-plugins to activate."
-echo "Verify: the 'zbp' skill auto-loads when editing .zig files."
+echo "Done. Run /reload-plugins in Claude Code to activate."
+echo "Plugin skill: zbp-skill:zbp (auto-loads on .zig files)"
+echo "Agent skill:  ~/.claude/agents/skills/zbp/ (usable by sub-agents)"
